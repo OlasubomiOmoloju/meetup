@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "type": "module",
+  "engines": { "node": ">=20.9.0" },
   "dependencies": {
     "@clerk/express": "^2.1.78",
     "@neondatabase/serverless": "^1.2.0",
