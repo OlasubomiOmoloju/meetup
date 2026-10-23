@@ -30,7 +30,10 @@ const ParticipantList = ({isOpen, onClose, localUser, localAudio, localVideo, re
         {/* List */}
         <div className="flex-1 p-4 overflow-y-auto space-y-3">
             {allParticipants.map((p)=>{
-                const isHost = meetingHostId && p.userId === meetingHostId;
+                    const isHost =
+                    meetingHostId &&
+                    p.userId &&
+                    String(p.userId) === String(meetingHostId);
 
                 return (
                     <div key={p.socketId}

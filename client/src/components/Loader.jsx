@@ -1,5 +1,5 @@
 import { VideoIcon } from 'lucide-react'
-import React from 'react'
+
 
 const Loader = ({text = "Loading..."}) => {
   return (

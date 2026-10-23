@@ -60,6 +60,9 @@ export function setupSocketIO(io){
                 // Get existing participants in the room
                 const existingUsers = Array.from(roomParticipants.values());
 
+                // Add the current participant to the room
+                roomParticipants.set(socket.id, currentUser);
+
                 // Add new participants into DB if not already present
                 const userId = user?.id || null;
                 const existingParticipants = await sql`
@@ -152,13 +155,13 @@ export function setupSocketIO(io){
                     INSERT INTO meeting_messages (meeting_id, sender_id, sender_name, text, timestamp)
                         VALUES (${meetingId}, ${senderId}, ${message.senderName || "Anonymous"}, ${message.text}, NOW())`;
 
-                        io.in(roomId).emit("recieve-message", {
+                        io.in(roomId).emit("receive-message", {
                             ...message,
                             senderSocketID: socket.id,
                         })
                 }
             } catch (error) {
-                console.error("Error saving chat message to DB:", err);
+                console.error("Error saving chat message to DB:", error);
             }
         }) 
 
@@ -181,7 +184,7 @@ export function setupSocketIO(io){
         socket.on('disconnect', ()=>{
            if (currentRoomId && rooms.has(currentRoomId)){
                const roomParticipants = rooms.get(currentRoomId);
-               roomParticipants.delete(socketId);
+               roomParticipants.delete(socket.id);
 
                if (roomParticipants.size === 0 ){
                 rooms.delete(currentRoomId);
