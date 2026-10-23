@@ -1,13 +1,47 @@
-import { getAuth } from "@clerk/express"
 
-export const protect = (res, req, next) =>{
-    const auth = getAuth(req);
-    const userId = auth?.userId || req.auth?.userId;
+import { getAuth } from "@clerk/express";
+import { sql } from "../config/db.js";
 
-    if(!userId){
-        return res.status(401).json({ error: "Not authorized, authentication required" });
+export const protect = async (req, res, next) => {
+    try {
+        const auth = getAuth(req);
+
+        const userId = auth?.userId;
+
+        if (!auth?.isAuthenticated || !userId) {
+            return res.status(401).json({
+                error: "Not authorized, authentication required",
+            });
+        }
+
+        req.user = { id: userId };
+
+        const userActivePlan = auth.has({ plan: "premium" })
+            ? "premium"
+            : "free";
+
+        const users = await sql`
+            SELECT name, plan
+            FROM users
+            WHERE id = ${userId}
+        `;
+
+        const userPlan = users[0]?.plan;
+
+        if (userPlan && userActivePlan !== userPlan) {
+            await sql`
+                UPDATE users
+                SET plan = ${userActivePlan}
+                WHERE id = ${userId}
+            `;
+        }
+
+        next();
+    } catch (error) {
+        console.error("Authentication middleware failed:", error);
+
+        return res.status(500).json({
+            error: "Authentication middleware failed",
+        });
     }
-
-    req.user = {id: userId};
-    next()
-}
+};

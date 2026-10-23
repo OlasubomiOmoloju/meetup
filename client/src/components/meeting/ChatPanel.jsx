@@ -42,7 +42,7 @@ const ChatPanel = ({ isOpen, onClose, messages, onSendMessage, currentUser }) =>
                 </div>
             ) : (
                 messages.map((msg, index)=>{
-                    const isMe = msg.senderid === currentUser?.id;
+                    const isMe = msg.senderId === currentUser?.id;
                     return (
                         <div key={msg.id || index} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
                             <div className='flex items-center gap-2 mb-1'>
